@@ -117,6 +117,7 @@ float global_yawval = 0; //updated by GetIMUHeadingDeg()
 void setup()
 {
   unsigned long now = millis();
+  pinMode(5, OUTPUT);
   Serial.begin(1); //rate value ignored
   int idx = 0;
   while (!Serial && (millis() - now) < 3000)
@@ -153,9 +154,11 @@ void setup()
 FASTRUN void capture_data()
 //void capture_data()
 {
+  digitalWriteFast(5, HIGH);
   last_portb = current_portb;
 #if defined(__IMXRT1062__)
-  current_portb = (digitalReadFast(SCL_PIN) << 2) | (digitalReadFast(SDA_PIN) << 3);
+   current_portb = (digitalReadFast(SCL_PIN) << 2) | (digitalReadFast(SDA_PIN) << 3);
+   current_portb = (digitalReadFast(SCL_PIN)? 4 : 0) | (digitalReadFast(SDA_PIN)? 8 : 0);
 #else
   current_portb = GPIOB_PDIR & 12; //reads state of SDA (18) & SCL (19) at same time
 #endif
@@ -208,7 +211,8 @@ FASTRUN void capture_data()
       bDone = true;
     }
   }
-}
+ digitalWriteFast(5, LOW);
+ }
 //-------------------------------------------------------------------------------
 //-------------------------------- END ISR    ---------------------------------
 //-------------------------------------------------------------------------------
